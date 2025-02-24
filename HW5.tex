@@ -78,7 +78,7 @@ runs in the directory as it is set up.
 \begin{knitrout}\scriptsize
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{#loading libraies}
+\hlcom{#loading libraries}
 \hlkwd{library}\hldef{(tidyverse)}
 \hlkwd{library}\hldef{(jsonlite)}
 
@@ -86,81 +86,73 @@ runs in the directory as it is set up.
 \hldef{essentia.csv} \hlkwb{=} \hlkwd{read_csv}\hldef{(}\hlsng{"EssentiaOutput/EssentiaModelOutput.csv"}\hldef{)}
 \hldef{liwc.csv} \hlkwb{=} \hlkwd{read_csv}\hldef{(}\hlsng{"LIWCOutput/LIWCOutput.csv"}\hldef{)}
 
-\hlcom{#object setup}
-\hldef{artist} \hlkwb{=} \hlkwd{c}\hldef{()}
-\hldef{album} \hlkwb{=} \hlkwd{c}\hldef{()}
-\hldef{track} \hlkwb{=} \hlkwd{c}\hldef{()}
-\hldef{overall.loudness} \hlkwb{=} \hlkwd{c}\hldef{()}
-\hldef{spectral.energy} \hlkwb{=} \hlkwd{c}\hldef{()}
-\hldef{dissonance} \hlkwb{=} \hlkwd{c}\hldef{()}
-\hldef{pitch.sailence} \hlkwb{=} \hlkwd{c}\hldef{()}
-\hldef{tempo.bpm} \hlkwb{=} \hlkwd{c}\hldef{()}
-\hldef{beat.loudness} \hlkwb{=} \hlkwd{c}\hldef{()}
-\hldef{danceability} \hlkwb{=} \hlkwd{c}\hldef{()}
-\hldef{tuning.freq} \hlkwb{=} \hlkwd{c}\hldef{()}
-
-\hlcom{#Getting list of .json songs and extracting data from each song}
+\hlcom{#Loading the List of Songs}
 \hldef{essentia.song.list} \hlkwb{=} \hlkwd{list.files}\hldef{(}\hlkwc{path} \hldef{=} \hlsng{"EssentiaOutput"}\hldef{)}
-\hlkwa{for}\hldef{(song} \hlkwa{in} \hldef{essentia.song.list)\{}
-  \hlkwa{if} \hldef{((}\hlkwd{str_sub}\hldef{(song,} \hlkwc{start} \hldef{=} \hlopt{-}\hlnum{5}\hldef{)} \hlopt{==} \hlsng{".json"}\hldef{))\{}
-    \hldef{song.extract} \hlkwb{=} \hlkwd{str_split_1}\hldef{(}\hlkwd{str_sub}\hldef{(song,} \hlkwc{start} \hldef{=} \hlnum{1}\hldef{,} \hlkwc{end} \hldef{=} \hlopt{-}\hlnum{6}\hldef{),} \hlsng{"-"}\hldef{)}
-    \hldef{artist} \hlkwb{=} \hlkwd{c}\hldef{(artist, song.extract[}\hlnum{1}\hldef{])}
-    \hldef{album} \hlkwb{=} \hlkwd{c}\hldef{(album, song.extract[}\hlnum{2}\hldef{])}
-    \hldef{track} \hlkwb{=} \hlkwd{c}\hldef{(track, song.extract[}\hlnum{3}\hldef{])}
+\hlcom{#Setting up the music.data dataframe(tibble)}
+\hldef{music.data} \hlkwb{<-} \hlkwd{tibble}\hldef{(}
+  \hlkwc{artist} \hldef{=} \hlkwd{character}\hldef{(),}
+  \hlkwc{album} \hldef{=} \hlkwd{character}\hldef{(),}
+  \hlkwc{track} \hldef{=} \hlkwd{character}\hldef{(),}
+  \hlkwc{overall.loudness} \hldef{=} \hlkwd{numeric}\hldef{(),}
+  \hlkwc{spectral.energy} \hldef{=} \hlkwd{numeric}\hldef{(),}
+  \hlkwc{dissonance} \hldef{=} \hlkwd{numeric}\hldef{(),}
+  \hlkwc{pitch.sailence} \hldef{=} \hlkwd{numeric}\hldef{(),}
+  \hlkwc{tempo.bpm} \hldef{=} \hlkwd{numeric}\hldef{(),}
+  \hlkwc{beat.loudness} \hldef{=} \hlkwd{numeric}\hldef{(),}
+  \hlkwc{danceability} \hldef{=} \hlkwd{numeric}\hldef{(),}
+  \hlkwc{tuning.freq} \hldef{=} \hlkwd{numeric}\hldef{()}
+\hldef{)}
+
+\hlkwa{for}\hldef{(song} \hlkwa{in} \hldef{essentia.song.list) \{} \hlcom{#For each song in the song list}
+  \hlkwa{if} \hldef{((}\hlkwd{str_sub}\hldef{(song,} \hlkwc{start} \hldef{=} \hlopt{-}\hlnum{5}\hldef{)} \hlopt{==} \hlsng{".json"}\hldef{))\{} \hlcom{#Pick only JSON files}
     \hldef{song.path} \hlkwb{=} \hlkwd{paste}\hldef{(}\hlsng{"EssentiaOutput"}\hldef{, song,} \hlkwc{sep} \hldef{=} \hlsng{"/"}\hldef{)}
-    \hldef{curr.json} \hlkwb{=} \hlkwd{fromJSON}\hldef{(song.path)}
-    \hldef{overall.loudness} \hlkwb{=} \hlkwd{c}\hldef{(overall.loudness, curr.json}\hlopt{$}\hldef{lowlevel}\hlopt{$}\hldef{loudness_ebu128}\hlopt{$}\hldef{integrated)}
-    \hldef{spectral.energy} \hlkwb{=} \hlkwd{c}\hldef{(spectral.energy, curr.json}\hlopt{$}\hldef{lowlevel}\hlopt{$}\hldef{spectral_energy}\hlopt{$}\hldef{mean)}
-    \hldef{dissonance} \hlkwb{=} \hlkwd{c}\hldef{(dissonance, curr.json}\hlopt{$}\hldef{lowlevel}\hlopt{$}\hldef{dissonance}\hlopt{$}\hldef{mean)}
-    \hldef{pitch.sailence} \hlkwb{=} \hlkwd{c}\hldef{(pitch.sailence, curr.json}\hlopt{$}\hldef{lowlevel}\hlopt{$}\hldef{pitch_salience}\hlopt{$}\hldef{mean)}
-    \hldef{tempo.bpm} \hlkwb{=} \hlkwd{c}\hldef{(tempo.bpm, curr.json}\hlopt{$}\hldef{rhythm}\hlopt{$}\hldef{bpm)}
-    \hldef{beat.loudness} \hlkwb{=} \hlkwd{c}\hldef{(beat.loudness, curr.json}\hlopt{$}\hldef{rhythm}\hlopt{$}\hldef{beats_loudness}\hlopt{$}\hldef{mean)}
-    \hldef{danceability} \hlkwb{=} \hlkwd{c}\hldef{(danceability, curr.json}\hlopt{$}\hldef{rhythm}\hlopt{$}\hldef{danceability)}
-    \hldef{tuning.freq} \hlkwb{=} \hlkwd{c}\hldef{(tuning.freq, curr.json}\hlopt{$}\hldef{tonal}\hlopt{$}\hldef{tuning_frequency)}
+    \hldef{song.extract} \hlkwb{=} \hlkwd{str_split_1}\hldef{(}\hlkwd{str_sub}\hldef{(song,} \hlkwc{start} \hldef{=} \hlnum{1}\hldef{,} \hlkwc{end} \hldef{=} \hlopt{-}\hlnum{6}\hldef{),} \hlsng{"-"}\hldef{)} \hlcom{#Get artist, album, and track info}
+    \hldef{song.data} \hlkwb{=} \hlkwd{fromJSON}\hldef{(song.path)}
+
+    \hldef{music.data} \hlkwb{<-} \hlkwd{bind_rows}\hldef{(music.data,} \hlkwd{tibble}\hldef{(} \hlcom{#Bind all the extracted data to the music.data tibble}
+      \hlkwc{artist} \hldef{= song.extract[}\hlnum{1}\hldef{],}                 \hlcom{#for every song in the song list}
+      \hlkwc{album} \hldef{= song.extract[}\hlnum{2}\hldef{],}
+      \hlkwc{track} \hldef{= song.extract[}\hlnum{3}\hldef{],}
+      \hlkwc{overall.loudness} \hldef{= song.data}\hlopt{$}\hldef{lowlevel}\hlopt{$}\hldef{loudness_ebu128}\hlopt{$}\hldef{integrated,}
+      \hlkwc{spectral.energy} \hldef{= song.data}\hlopt{$}\hldef{lowlevel}\hlopt{$}\hldef{spectral_energy}\hlopt{$}\hldef{mean,}
+      \hlkwc{dissonance} \hldef{= song.data}\hlopt{$}\hldef{lowlevel}\hlopt{$}\hldef{dissonance}\hlopt{$}\hldef{mean,}
+      \hlkwc{pitch.sailence} \hldef{= song.data}\hlopt{$}\hldef{lowlevel}\hlopt{$}\hldef{pitch_salience}\hlopt{$}\hldef{mean,}
+      \hlkwc{tempo.bpm} \hldef{= song.data}\hlopt{$}\hldef{rhythm}\hlopt{$}\hldef{bpm,}
+      \hlkwc{beat.loudness} \hldef{= song.data}\hlopt{$}\hldef{rhythm}\hlopt{$}\hldef{beats_loudness}\hlopt{$}\hldef{mean,}
+      \hlkwc{danceability} \hldef{= song.data}\hlopt{$}\hldef{rhythm}\hlopt{$}\hldef{danceability,}
+      \hlkwc{tuning.freq} \hldef{= song.data}\hlopt{$}\hldef{tonal}\hlopt{$}\hldef{tuning_frequency}
+    \hldef{))}
   \hldef{\}}
 \hldef{\}}
-
-\hlcom{#extracted data fused into a data frame}
-\hldef{music.data} \hlkwb{=} \hlkwd{cbind}\hldef{(artist,}
-                   \hldef{album,}
-                   \hldef{track,}
-                   \hldef{overall.loudness,}
-                   \hldef{spectral.energy,}
-                   \hldef{dissonance,}
-                   \hldef{pitch.sailence,}
-                   \hldef{tempo.bpm,}
-                   \hldef{beat.loudness,}
-                   \hldef{danceability,}
-                   \hldef{tuning.freq)}
 
 \hlcom{#Creating the Master data set}
 \hldef{final.dataframe} \hlkwb{<-} \hldef{essentia.csv |>}
   \hlkwd{rowwise}\hldef{() |>}
-  \hlkwd{mutate}\hldef{(}\hlkwc{valence} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(deam_valence,}
+  \hlkwd{mutate}\hldef{(}\hlkwc{valence} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(deam_valence,} \hlcom{#Computes Valence values}
                           \hldef{emo_valence,}
                           \hldef{muse_valence)),}
-         \hlkwc{arousal} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(deam_arousal,}
+         \hlkwc{arousal} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(deam_arousal,} \hlcom{#Computes Arousal values}
                           \hldef{emo_arousal,}
                           \hldef{muse_arousal)),}
-         \hlkwc{agressive} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(eff_aggressive,}
+         \hlkwc{agressive} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(eff_aggressive,} \hlcom{#Computes Agressive values}
                             \hldef{nn_aggressive)),}
-         \hlkwc{happy} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(eff_happy,}
+         \hlkwc{happy} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(eff_happy,} \hlcom{#Computes Happy values}
                         \hldef{nn_happy)),}
-         \hlkwc{party} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(eff_party,}
+         \hlkwc{party} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(eff_party,} \hlcom{#Computes Party values}
                         \hldef{nn_party)),}
-         \hlkwc{relaxed} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(eff_relax,}
+         \hlkwc{relaxed} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(eff_relax,} \hlcom{#Computes Relaxed values}
                           \hldef{nn_relax)),}
-         \hlkwc{sad} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(eff_sad,}
+         \hlkwc{sad} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(eff_sad,} \hlcom{#Computes Sad values}
                       \hldef{nn_sad)),}
-         \hlkwc{acoustic} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(eff_acoustic,}
+         \hlkwc{acoustic} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(eff_acoustic,} \hlcom{#Computes Acoustic values}
                            \hldef{nn_acoustic)),}
-         \hlkwc{electric} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(eff_electronic,}
+         \hlkwc{electric} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(eff_electronic,} \hlcom{#Computes Electric values}
                            \hldef{nn_electronic)),}
-         \hlkwc{instrumental} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(eff_instrumental,}
+         \hlkwc{instrumental} \hldef{=} \hlkwd{mean}\hldef{(}\hlkwd{c}\hldef{(eff_instrumental,} \hlcom{#Computes Instrumental values}
                                \hldef{nn_instrumental))) |>}
   \hlkwd{ungroup}\hldef{() |>}
-  \hlkwd{rename}\hldef{(}\hlkwc{timbreBright} \hldef{= eff_timbre_bright) |>}
-  \hlkwd{select}\hldef{(}\hlsng{"artist"}\hldef{,}
+  \hlkwd{rename}\hldef{(}\hlkwc{timbreBright} \hldef{= eff_timbre_bright) |>} \hlcom{#rename a column to timbreBright}
+  \hlkwd{select}\hldef{(}\hlsng{"artist"}\hldef{,} \hlcom{#  Select only columns with data we want}
          \hlsng{"album"}\hldef{,}
          \hlsng{"track"}\hldef{,}
          \hlsng{"timbreBright"}\hldef{,}
@@ -174,17 +166,17 @@ runs in the directory as it is set up.
          \hlsng{"acoustic"}\hldef{,}
          \hlsng{"electric"}\hldef{,}
          \hlsng{"instrumental"}\hldef{)} \hlopt{%>%}
-  \hlkwd{left_join}\hldef{(}\hlkwd{as_tibble}\hldef{(music.data),} \hlkwc{by} \hldef{=} \hlkwd{c}\hldef{(}\hlsng{"album"}\hldef{,} \hlsng{"track"}\hldef{))} \hlopt{%>%}
-  \hlkwd{left_join}\hldef{(liwc.csv,} \hlkwc{by} \hldef{=} \hlkwd{c}\hldef{(}\hlsng{"album"}\hldef{,} \hlsng{"track"}\hldef{)) |>}
-  \hlkwd{select}\hldef{(}\hlopt{-}\hldef{artist,} \hlopt{-}\hldef{artist.y) |>}
-  \hlkwd{rename}\hldef{(}\hlkwc{artist} \hldef{= artist.x)}
+  \hlkwd{left_join}\hldef{(}\hlkwd{as_tibble}\hldef{(music.data),} \hlkwc{by} \hldef{=} \hlkwd{c}\hldef{(}\hlsng{"album"}\hldef{,} \hlsng{"track"}\hldef{))} \hlopt{%>%} \hlcom{#Join our essentia data with music.data}
+  \hlkwd{left_join}\hldef{(liwc.csv,} \hlkwc{by} \hldef{=} \hlkwd{c}\hldef{(}\hlsng{"album"}\hldef{,} \hlsng{"track"}\hldef{)) |>} \hlcom{#join essentia data with liwc data}
+  \hlkwd{select}\hldef{(}\hlopt{-}\hldef{artist,} \hlopt{-}\hldef{artist.y) |>} \hlcom{#remove duplicated columns}
+  \hlkwd{rename}\hldef{(}\hlkwc{artist} \hldef{= artist.x)} \hlcom{#rename column to artist}
 
 \hlcom{################################################################################}
 \hlcom{#Box Plot Analysis}
 \hlcom{################################################################################}
-\hldef{train.data} \hlkwb{=} \hlkwd{read.csv}\hldef{(}\hlsng{"trainingdata.csv"}\hldef{)}
+\hldef{train.data} \hlkwb{=} \hlkwd{read.csv}\hldef{(}\hlsng{"trainingdata.csv"}\hldef{)} \hlcom{#Get our training data (W/O Allentown)}
 
-\hlkwd{ggplot}\hldef{(}\hlkwd{aes}\hldef{(}\hlkwc{x} \hldef{= artist,}
+\hlkwd{ggplot}\hldef{(}\hlkwd{aes}\hldef{(}\hlkwc{x} \hldef{= artist,} \hlcom{#Plots distribution of artists on spectral energy}
            \hlkwc{y} \hldef{=} \hlkwd{as.numeric}\hldef{(spectral.energy)),}
        \hlkwc{data} \hldef{= train.data,)} \hlopt{+}
   \hlkwd{geom_violin}\hldef{(}\hlkwc{fill} \hldef{=} \hlsng{"grey90"}\hldef{)} \hlopt{+}
@@ -193,7 +185,7 @@ runs in the directory as it is set up.
   \hlkwd{labs}\hldef{(}\hlkwc{x} \hldef{=} \hlsng{"Artists"}\hldef{,}
        \hlkwc{y} \hldef{=} \hlsng{"Spectral Energy"}\hldef{,)}
 
-\hlkwd{ggplot}\hldef{(}\hlkwd{aes}\hldef{(}\hlkwc{x} \hldef{= artist,}
+\hlkwd{ggplot}\hldef{(}\hlkwd{aes}\hldef{(}\hlkwc{x} \hldef{= artist,} \hlcom{#Plots distribution of artists on arousal}
            \hlkwc{y} \hldef{=} \hlkwd{as.numeric}\hldef{(arousals)),}
        \hlkwc{data} \hldef{= train.data)} \hlopt{+}
   \hlkwd{geom_violin}\hldef{(}\hlkwc{fill} \hldef{=} \hlsng{"grey90"}\hldef{)} \hlopt{+}
@@ -202,7 +194,7 @@ runs in the directory as it is set up.
   \hlkwd{labs}\hldef{(}\hlkwc{x} \hldef{=} \hlsng{"Artists"}\hldef{,}
        \hlkwc{y} \hldef{=} \hlsng{"Arousal"}\hldef{)}
 
-\hlkwd{ggplot}\hldef{(}\hlkwd{aes}\hldef{(}\hlkwc{x} \hldef{= artist,}
+\hlkwd{ggplot}\hldef{(}\hlkwd{aes}\hldef{(}\hlkwc{x} \hldef{= artist,} \hlcom{#Plots distribution of artists on Authenticity}
            \hlkwc{y} \hldef{=} \hlkwd{as.numeric}\hldef{(Authentic)),}
        \hlkwc{data} \hldef{= train.data)} \hlopt{+}
   \hlkwd{geom_violin}\hldef{(}\hlkwc{fill} \hldef{=} \hlsng{"grey90"}\hldef{)} \hlopt{+}
